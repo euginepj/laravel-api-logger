@@ -15,7 +15,7 @@ class PayloadSanitizerTest extends TestCase
             'token' => 'bearer-abc',
         ];
 
-        $sanitized = PayloadSanitizer::clean($payload);
+        $sanitized = PayloadSanitizer::cleanPayload($payload);
 
         $this->assertEquals('testuser', $sanitized['username']);
         $this->assertEquals('********', $sanitized['password']);
@@ -34,9 +34,32 @@ class PayloadSanitizerTest extends TestCase
             ]
         ];
 
-        $sanitized = PayloadSanitizer::clean($payload);
+        $sanitized = PayloadSanitizer::cleanPayload($payload, ['card_number']);
 
         $this->assertEquals('********', $sanitized['data']['user']['card_number']);
         $this->assertEquals('user@example.com', $sanitized['data']['user']['email']);
+    }
+
+    /** @test */
+    public function it_sanitizes_sensitive_headers()
+    {
+        $headers = [
+            'authorization' => ['Bearer secret-token'],
+            'content-type' => ['application/json'],
+        ];
+
+        $sanitized = PayloadSanitizer::cleanHeaders($headers);
+
+        $this->assertEquals(['********'], $sanitized['authorization']);
+        $this->assertEquals(['application/json'], $sanitized['content-type']);
+    }
+
+    /** @test */
+    public function it_formats_and_truncates_response_body()
+    {
+        $content = str_repeat('A', 100);
+        $formatted = PayloadSanitizer::formatResponseBody($content, 50);
+
+        $this->assertStringContainsString('[TRUNCATED', $formatted);
     }
 }
