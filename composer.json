@@ -1,0 +1,42 @@
+{
+    "name": "euginepj/laravel-api-logger",
+    "description": "Global API request and response logging middleware with visual admin dashboard for Laravel.",
+    "keywords": ["laravel", "api", "logger", "middleware", "debugging", "dashboard"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Eugine",
+            "homepage": "https://github.com/euginepj"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/contracts": "^10.0|^11.0|^12.0",
+        "illuminate/support": "^10.0|^11.0|^12.0",
+        "illuminate/database": "^10.0|^11.0|^12.0",
+        "illuminate/http": "^10.0|^11.0|^12.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^8.0|^9.0|^10.0",
+        "phpunit/phpunit": "^10.0|^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Euginepj\\ApiLogger\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Euginepj\\ApiLogger\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Euginepj\\ApiLogger\\ApiLoggerServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
