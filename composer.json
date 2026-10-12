@@ -2,6 +2,7 @@
     "name": "euginepj/laravel-api-logger",
     "description": "Global API request and response logging middleware with visual admin dashboard for Laravel.",
     "keywords": ["laravel", "api", "logger", "middleware", "debugging", "dashboard"],
+    "homepage": "https://github.com/euginepj/laravel-api-logger",
     "license": "MIT",
     "authors": [
         {
@@ -30,6 +31,9 @@
             "Euginepj\\ApiLogger\\Tests\\": "tests/"
         }
     },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
+    },
     "extra": {
         "laravel": {
             "providers": [
@@ -37,6 +41,6 @@
             ]
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true
 }
