@@ -3,11 +3,12 @@
 namespace Euginepj\ApiLogger\Tests;
 
 use Euginepj\ApiLogger\Support\PayloadSanitizer;
+use PHPUnit\Framework\Attributes\Test;
 
 class PayloadSanitizerTest extends TestCase
 {
-    /** @test */
-    public function it_masks_sensitive_keys_in_payload()
+    #[Test]
+    public function it_masks_sensitive_keys_in_payload(): void
     {
         $payload = [
             'username' => 'testuser',
@@ -22,8 +23,8 @@ class PayloadSanitizerTest extends TestCase
         $this->assertEquals('********', $sanitized['token']);
     }
 
-    /** @test */
-    public function it_masks_nested_sensitive_keys()
+    #[Test]
+    public function it_masks_nested_sensitive_keys(): void
     {
         $payload = [
             'data' => [
@@ -40,8 +41,8 @@ class PayloadSanitizerTest extends TestCase
         $this->assertEquals('user@example.com', $sanitized['data']['user']['email']);
     }
 
-    /** @test */
-    public function it_sanitizes_sensitive_headers()
+    #[Test]
+    public function it_sanitizes_sensitive_headers(): void
     {
         $headers = [
             'authorization' => ['Bearer secret-token'],
@@ -54,8 +55,8 @@ class PayloadSanitizerTest extends TestCase
         $this->assertEquals(['application/json'], $sanitized['content-type']);
     }
 
-    /** @test */
-    public function it_formats_and_truncates_response_body()
+    #[Test]
+    public function it_formats_and_truncates_response_body(): void
     {
         $content = str_repeat('A', 100);
         $formatted = PayloadSanitizer::formatResponseBody($content, 50);
