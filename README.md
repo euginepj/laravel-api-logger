@@ -8,6 +8,13 @@ A high-performance API request and response logging middleware with visual analy
 
 ---
 
+## 📋 Requirements
+
+- **PHP:** 8.2 or higher (Laravel 13 requires PHP 8.3+)
+- **Laravel:** 10.x, 11.x, 12.x, or 13.x
+
+---
+
 ## ✨ Features
 
 - **Asynchronous Lifecycle Logging**: Runs during Laravel's `terminate` lifecycle step to avoid slowing down API response times.
