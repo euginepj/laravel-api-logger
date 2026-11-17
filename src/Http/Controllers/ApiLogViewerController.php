@@ -25,27 +25,60 @@ class ApiLogViewerController extends Controller
 
         // Status filter
         if ($request->filled('status')) {
-            $status = $request->string('status');
-            if (in_array($status, ['2xx', '3xx', '4xx', '5xx'], true)) {
+            $status = (string) $request->string('status');
+            if ($status === 'errors') {
+                $query->where('status_code', '>=', 400);
+            } elseif (in_array($status, ['2xx', '3xx', '4xx', '5xx'], true)) {
                 $query->statusClass($status);
             } elseif (is_numeric($status)) {
                 $query->where('status_code', (int) $status);
             }
         }
 
-        // Search filter (path, IP, user_id, or error_message)
+        // Search filter (path, IP, user_id, device, error_message, url, or structured operators)
         if ($request->filled('search')) {
-            $search = trim($request->string('search'));
-            $query->where(function ($q) use ($search) {
-                $q->where('path', 'like', "%{$search}%")
-                    ->orWhere('ip_address', 'like', "%{$search}%")
-                    ->orWhere('device_name', 'like', "%{$search}%")
-                    ->orWhere('error_message', 'like', "%{$search}%")
-                    ->orWhere('url', 'like', "%{$search}%");
-                if (is_numeric($search)) {
-                    $q->orWhere('user_id', (int) $search);
+            $search = trim((string) $request->string('search'));
+
+            // Check for user-specific search (e.g., #35, user:35, or u:35)
+            if (preg_match('/^(?:user:|u:)?#?(\d+)$/i', $search, $matches)) {
+                $userId = (int) $matches[1];
+                $query->where(function ($q) use ($userId, $search) {
+                    $q->where('user_id', $userId)
+                        ->orWhere('path', 'like', "%{$search}%")
+                        ->orWhere('ip_address', 'like', "%{$search}%");
+                });
+            } elseif (preg_match('/^ip:(.+)$/i', $search, $matches)) {
+                $query->where('ip_address', trim($matches[1]));
+            } elseif (preg_match('/^status:(\d+|errors|2xx|3xx|4xx|5xx)$/i', $search, $matches)) {
+                $targetStatus = strtolower(trim($matches[1]));
+                if ($targetStatus === 'errors') {
+                    $query->where('status_code', '>=', 400);
+                } elseif (in_array($targetStatus, ['2xx', '3xx', '4xx', '5xx'], true)) {
+                    $query->statusClass($targetStatus);
+                } elseif (is_numeric($targetStatus)) {
+                    $query->where('status_code', (int) $targetStatus);
                 }
-            });
+            } elseif (preg_match('/^method:(get|post|put|patch|delete)$/i', $search, $matches)) {
+                $query->where('method', strtoupper($matches[1]));
+            } else {
+                $cleanSearch = ltrim($search, '#');
+                $query->where(function ($q) use ($search, $cleanSearch) {
+                    $q->where('path', 'like', "%{$search}%")
+                        ->orWhere('ip_address', 'like', "%{$search}%")
+                        ->orWhere('device_name', 'like', "%{$search}%")
+                        ->orWhere('error_message', 'like', "%{$search}%")
+                        ->orWhere('url', 'like', "%{$search}%");
+
+                    if (is_numeric($cleanSearch)) {
+                        $q->orWhere('user_id', (int) $cleanSearch);
+                    }
+                });
+            }
+        }
+
+        // Slow requests filter (> 1000ms)
+        if ($request->boolean('slow')) {
+            $query->where('duration_ms', '>=', 1000);
         }
 
         // Date filter

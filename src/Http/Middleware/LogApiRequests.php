@@ -117,11 +117,40 @@ class LogApiRequests
 
         if (in_array($driver, ['database', 'both'], true)) {
             ApiRequestLog::create($logData);
+            $this->pruneExceededRecords();
         }
 
         if (in_array($driver, ['file', 'both'], true)) {
             $channel = config('api-logger.log_channel', 'daily');
             Log::channel($channel)->info("API Request Log: [{$logData['method']}] {$logData['path']} ({$statusCode})", $logData);
+        }
+    }
+
+    /**
+     * Periodically prune records exceeding the configured maximum count using a lottery.
+     */
+    protected function pruneExceededRecords(): void
+    {
+        $maxRecords = (int) config('api-logger.max_records', 1000);
+        if ($maxRecords <= 0) {
+            return;
+        }
+
+        $lottery = config('api-logger.prune_lottery', [2, 100]);
+        $hits = (int) ($lottery[0] ?? 2);
+        $outOf = (int) ($lottery[1] ?? 100);
+
+        if ($hits > 0 && $outOf > 0 && random_int(1, $outOf) <= $hits) {
+            $cutoffId = ApiRequestLog::query()
+                ->latest('id')
+                ->skip($maxRecords)
+                ->value('id');
+
+            if ($cutoffId) {
+                ApiRequestLog::query()
+                    ->where('id', '<=', $cutoffId)
+                    ->delete();
+            }
         }
     }
 }

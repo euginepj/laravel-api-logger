@@ -57,6 +57,18 @@ return [
     'max_body_length' => env('API_LOGGER_MAX_BODY_LENGTH', 65535),
 
     /*
+     * Maximum number of latest records to retain (rolling buffer).
+     * Set to 0 or null to disable count-based pruning.
+     */
+    'max_records' => env('API_LOGGER_MAX_RECORDS', 1000),
+
+    /*
+     * Prune lottery odds [hits, out_of] for rolling buffer pruning.
+     * By default, 2 out of 100 requests (2%) trigger rolling cleanup in middleware terminate().
+     */
+    'prune_lottery' => [2, 100],
+
+    /*
      * Number of days to retain logs before pruning.
      */
     'prune_days' => env('API_LOGGER_PRUNE_DAYS', 30),

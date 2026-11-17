@@ -53,30 +53,42 @@
 
     <!-- Metrics Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white dark:bg-[#151c24] border border-zinc-200 dark:border-white/5 rounded-2xl p-4 shadow-xs">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Recorded</span>
+        <a href="{{ route('admin.api-logs.index') }}" class="group bg-white dark:bg-[#151c24] border border-zinc-200 dark:border-white/5 hover:border-[var(--primary)]/40 rounded-2xl p-4 shadow-xs transition-all cursor-pointer" title="View all logs">
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 group-hover:text-[var(--primary)] transition-colors">Total Recorded</span>
+                <span class="text-[10px] text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">View all &rarr;</span>
+            </div>
             <div class="text-2xl font-black text-slate-900 dark:text-white mt-1">{{ number_format($metrics['total_requests']) }}</div>
-        </div>
-        <div class="bg-white dark:bg-[#151c24] border border-zinc-200 dark:border-white/5 rounded-2xl p-4 shadow-xs">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Today's Traffic</span>
+        </a>
+        <a href="{{ route('admin.api-logs.index', ['date' => now()->toDateString()]) }}" class="group bg-white dark:bg-[#151c24] border border-zinc-200 dark:border-white/5 hover:border-blue-500/40 rounded-2xl p-4 shadow-xs transition-all cursor-pointer" title="Filter by today's traffic">
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 group-hover:text-blue-500 transition-colors">Today's Traffic</span>
+                <span class="text-[10px] text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">Filter &rarr;</span>
+            </div>
             <div class="text-2xl font-black text-blue-600 dark:text-blue-400 mt-1">{{ number_format($metrics['today_requests']) }}</div>
-        </div>
-        <div class="bg-white dark:bg-[#151c24] border border-zinc-200 dark:border-white/5 rounded-2xl p-4 shadow-xs">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Error Rate</span>
+        </a>
+        <a href="{{ route('admin.api-logs.index', ['status' => 'errors']) }}" class="group bg-white dark:bg-[#151c24] border border-zinc-200 dark:border-white/5 hover:border-red-500/40 rounded-2xl p-4 shadow-xs transition-all cursor-pointer" title="Click to filter all 4xx & 5xx errors">
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 group-hover:text-red-500 transition-colors">Error Rate</span>
+                <span class="text-[10px] text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">Show errors &rarr;</span>
+            </div>
             <div class="text-2xl font-black {{ $metrics['error_rate'] > 5 ? 'text-red-500' : 'text-emerald-500' }} mt-1">{{ $metrics['error_rate'] }}%</div>
-        </div>
-        <div class="bg-white dark:bg-[#151c24] border border-zinc-200 dark:border-white/5 rounded-2xl p-4 shadow-xs">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Avg Latency</span>
+        </a>
+        <a href="{{ route('admin.api-logs.index', ['slow' => 1]) }}" class="group bg-white dark:bg-[#151c24] border border-zinc-200 dark:border-white/5 hover:border-amber-500/40 rounded-2xl p-4 shadow-xs transition-all cursor-pointer" title="Filter requests >= 1000ms">
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 group-hover:text-amber-500 transition-colors">Avg Latency</span>
+                <span class="text-[10px] text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity">Slow &gt;1s &rarr;</span>
+            </div>
             <div class="text-2xl font-black text-slate-900 dark:text-white mt-1">{{ $metrics['avg_duration_ms'] }} <span class="text-xs font-normal text-slate-400">ms</span></div>
-        </div>
+        </a>
     </div>
 
     <!-- Filters Bar -->
-    <div class="bg-white dark:bg-[#151c24] border border-zinc-200 dark:border-white/5 rounded-2xl p-4 shadow-xs">
+    <div class="bg-white dark:bg-[#151c24] border border-zinc-200 dark:border-white/5 rounded-2xl p-4 shadow-xs space-y-3">
         <form method="GET" action="{{ route('admin.api-logs.index') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
             <!-- Search -->
             <div class="md:col-span-2">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search path, IP, user ID, or error..." class="w-full bg-slate-50 dark:bg-black/20 border border-zinc-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-[var(--primary)] focus:outline-hidden text-slate-800 dark:text-slate-200">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search path, IP, #user, or status:500..." class="w-full bg-slate-50 dark:bg-black/20 border border-zinc-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-[var(--primary)] focus:outline-hidden text-slate-800 dark:text-slate-200">
             </div>
 
             <!-- Method Filter -->
@@ -93,6 +105,7 @@
             <div>
                 <select name="status" class="w-full bg-slate-50 dark:bg-[#0b0f13] border border-zinc-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-[var(--primary)] focus:outline-hidden text-slate-800 dark:text-slate-200">
                     <option value="">All Statuses</option>
+                    <option value="errors" {{ request('status') === 'errors' ? 'selected' : '' }}>All Errors (4xx & 5xx)</option>
                     <option value="2xx" {{ request('status') === '2xx' ? 'selected' : '' }}>2xx Success</option>
                     <option value="3xx" {{ request('status') === '3xx' ? 'selected' : '' }}>3xx Redirect</option>
                     <option value="4xx" {{ request('status') === '4xx' ? 'selected' : '' }}>4xx Client Error</option>
@@ -103,7 +116,7 @@
             <!-- Actions -->
             <div class="flex items-center gap-2">
                 <button type="submit" class="flex-1 px-4 py-2 bg-[var(--primary)] text-white text-xs font-bold rounded-xl hover:opacity-90 transition-opacity">Filter</button>
-                @if(request()->hasAny(['search', 'method', 'status', 'date']))
+                @if(request()->hasAny(['search', 'method', 'status', 'date', 'slow']))
                     <a href="{{ route('admin.api-logs.index') }}" class="p-2 border border-zinc-200 dark:border-white/10 rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-white" title="Reset Filters">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -112,6 +125,44 @@
                 @endif
             </div>
         </form>
+
+        @if(request()->hasAny(['search', 'method', 'status', 'date', 'slow']))
+            <!-- Active Filter Badges -->
+            <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-zinc-100 dark:border-white/5 text-[11px]">
+                <span class="text-slate-400 font-semibold">Active filters:</span>
+                @if(request('search'))
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 border border-zinc-200 dark:border-white/10">
+                        <span>Search: <strong>{{ request('search') }}</strong></span>
+                        <a href="{{ route('admin.api-logs.index', request()->except('search', 'page')) }}" class="hover:text-red-500 font-bold">&times;</a>
+                    </span>
+                @endif
+                @if(request('method'))
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 border border-zinc-200 dark:border-white/10">
+                        <span>Method: <strong>{{ request('method') }}</strong></span>
+                        <a href="{{ route('admin.api-logs.index', request()->except('method', 'page')) }}" class="hover:text-red-500 font-bold">&times;</a>
+                    </span>
+                @endif
+                @if(request('status'))
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 border border-zinc-200 dark:border-white/10">
+                        <span>Status: <strong>{{ request('status') === 'errors' ? 'All Errors' : request('status') }}</strong></span>
+                        <a href="{{ route('admin.api-logs.index', request()->except('status', 'page')) }}" class="hover:text-red-500 font-bold">&times;</a>
+                    </span>
+                @endif
+                @if(request('date'))
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 border border-zinc-200 dark:border-white/10">
+                        <span>Date: <strong>{{ request('date') }}</strong></span>
+                        <a href="{{ route('admin.api-logs.index', request()->except('date', 'page')) }}" class="hover:text-red-500 font-bold">&times;</a>
+                    </span>
+                @endif
+                @if(request('slow'))
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                        <span>Slow (&ge; 1000ms)</span>
+                        <a href="{{ route('admin.api-logs.index', request()->except('slow', 'page')) }}" class="hover:text-red-500 font-bold">&times;</a>
+                    </span>
+                @endif
+                <a href="{{ route('admin.api-logs.index') }}" class="text-[11px] text-[var(--primary)] hover:underline ml-1">Clear all</a>
+            </div>
+        @endif
     </div>
 
     <!-- Logs Table -->
@@ -151,14 +202,14 @@
                         @endphp
                         <tr class="hover:bg-slate-50 dark:hover:bg-white/[0.01] transition-colors cursor-pointer" @click="openModal({{ $log->id }})">
                             <td class="px-4 py-3">
-                                <span class="px-2 py-0.5 rounded-md font-mono font-bold text-[11px] border {{ $statusClass }}">
+                                <a href="{{ route('admin.api-logs.index', ['status' => $log->status_code]) }}" @click.stop class="inline-block px-2 py-0.5 rounded-md font-mono font-bold text-[11px] border {{ $statusClass }} hover:opacity-80 transition-opacity" title="Filter by status {{ $log->status_code }}">
                                     {{ $log->status_code }}
-                                </span>
+                                </a>
                             </td>
                             <td class="px-4 py-3">
-                                <span class="px-2 py-0.5 rounded-md font-mono font-bold text-[10px] border {{ $methodClass }}">
+                                <a href="{{ route('admin.api-logs.index', ['method' => $log->method]) }}" @click.stop class="inline-block px-2 py-0.5 rounded-md font-mono font-bold text-[10px] border {{ $methodClass }} hover:opacity-80 transition-opacity" title="Filter by method {{ $log->method }}">
                                     {{ $log->method }}
-                                </span>
+                                </a>
                             </td>
                             <td class="px-4 py-3 font-mono font-medium text-slate-900 dark:text-white max-w-xs truncate" title="{{ $log->path }}">
                                 {{ $log->path }}
@@ -171,10 +222,10 @@
                             </td>
                             <td class="px-4 py-3">
                                 @if($log->user_id)
-                                    <span class="inline-flex items-center gap-1 font-mono font-medium text-slate-800 dark:text-slate-200">
+                                    <a href="{{ route('admin.api-logs.index', ['search' => '#' . $log->user_id]) }}" @click.stop class="inline-flex items-center gap-1 font-mono font-medium text-slate-800 dark:text-slate-200 hover:text-[var(--primary)] dark:hover:text-[var(--primary)] transition-colors" title="Filter logs for User #{{ $log->user_id }}">
                                         <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                                         #{{ $log->user_id }}
-                                    </span>
+                                    </a>
                                 @else
                                     <span class="text-slate-400">Guest</span>
                                 @endif
@@ -190,7 +241,9 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3 font-mono text-slate-500 dark:text-slate-400">
-                                {{ $log->ip_address }}
+                                <a href="{{ route('admin.api-logs.index', ['search' => 'ip:' . $log->ip_address]) }}" @click.stop class="hover:text-slate-800 dark:hover:text-slate-200 hover:underline" title="Filter by IP {{ $log->ip_address }}">
+                                    {{ $log->ip_address }}
+                                </a>
                             </td>
                             <td class="px-4 py-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">
                                 {{ $log->created_at?->format('M d, H:i:s') }}
@@ -206,7 +259,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center py-12 text-slate-400">
+                            <td colspan="9" class="text-center py-12 text-slate-400">
                                 <div class="max-w-sm mx-auto space-y-2">
                                     <svg class="w-10 h-10 mx-auto text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
