@@ -276,7 +276,7 @@
 
         @if($logs->hasPages())
             <div class="p-4 border-t border-zinc-200 dark:border-white/5">
-                {{ $logs->links() }}
+                {{ $logs->links('api-logger::pagination') }}
             </div>
         @endif
     </div>
