@@ -246,7 +246,9 @@
                                 </a>
                             </td>
                             <td class="px-4 py-3 text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                                {{ $log->created_at?->format('M d, H:i:s') }}
+                                <span class="local-datetime" data-utc="{{ $log->created_at?->toIso8601String() }}" title="{{ $log->created_at?->toIso8601String() }} (UTC)">
+                                    {{ $log->created_at?->format('M d, H:i:s') }}
+                                </span>
                             </td>
                             <td class="px-4 py-3 text-right" @click.stop>
                                 <button type="button" @click="openModal({{ $log->id }})" class="p-1.5 text-slate-400 hover:text-[var(--primary)] transition-colors">
@@ -317,7 +319,7 @@
                     </div>
                     <div>
                         <span class="text-slate-400">Date:</span>
-                        <span class="font-mono ml-1 text-slate-800 dark:text-slate-200" x-text="selectedLog?.created_at"></span>
+                        <span class="font-mono ml-1 text-slate-800 dark:text-slate-200" x-text="formatLocalTime(selectedLog?.created_at)" :title="selectedLog?.created_at + ' (UTC)'"></span>
                     </div>
                 </div>
 
@@ -394,9 +396,35 @@ function apiLogViewer() {
         refreshTimer: null,
 
         init() {
+            this.convertAllTimestamps();
             if (this.autoRefresh) {
                 this.startTimer();
             }
+        },
+
+        convertAllTimestamps() {
+            this.$nextTick(() => {
+                document.querySelectorAll('.local-datetime[data-utc]').forEach(el => {
+                    const utc = el.getAttribute('data-utc');
+                    if (utc) {
+                        el.textContent = this.formatLocalTime(utc);
+                    }
+                });
+            });
+        },
+
+        formatLocalTime(utcDateStr) {
+            if (!utcDateStr) return '-';
+            const date = new Date(utcDateStr);
+            if (isNaN(date.getTime())) return utcDateStr;
+            return date.toLocaleString(undefined, {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
         },
 
         toggleAutoRefresh() {

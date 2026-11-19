@@ -110,7 +110,7 @@ class LogApiRequests
             'response_headers' => $response->headers->all(),
             'response_body' => $responseBody,
             'error_message' => $errorMessage,
-            'created_at' => now(),
+            'created_at' => now()->utc(),
         ];
 
         $driver = config('api-logger.driver', 'database');

@@ -91,7 +91,7 @@ class ApiLogViewerController extends Controller
 
         // Calculate summary metrics
         $totalCount = ApiRequestLog::count();
-        $todayCount = ApiRequestLog::whereDate('created_at', now()->toDateString())->count();
+        $todayCount = ApiRequestLog::whereDate('created_at', now()->utc()->toDateString())->count();
         $errorCount = ApiRequestLog::where('status_code', '>=', 400)->count();
         $errorRate = $totalCount > 0 ? round(($errorCount / $totalCount) * 100, 1) : 0;
         $avgDuration = round((float) ApiRequestLog::avg('duration_ms'), 1);
